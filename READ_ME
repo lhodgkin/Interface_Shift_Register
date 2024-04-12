@@ -1,0 +1,8 @@
+
+
+This repository is a test to start working with git and Makefile
+There is a cource file "source.c" which toggles the built in LED on
+an arduino UNO R3 "PORTB" pin 5. 
+
+This repository uses "avr-gcc" as the compilier. 
+
