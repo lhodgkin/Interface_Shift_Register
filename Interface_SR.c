@@ -10,7 +10,8 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <util/delay.h>
+#define del 10 
 
 /*
     This source file will implement an interface to the TI SN74HC595N 8 - Bit Shift Register
@@ -24,26 +25,38 @@
 
 void SR_out(int SRclk , int Rclk , int dataPin, int value , int LSB)
 {
-    int temp = 0; 
+
     
     for (int i = 0; i < 8 ; i++) 
     {
         // Set output data pin
-        PORTB |= ((value & 0x0001)<< dataPin);
-        value >>= 1 ;        // Bit shift right the value vein shifted out to SR
+        // This statment only turns on the the serial pin but dies not turn it off. 
+        if(!!(value & 0x01))
+        {
+            PORTB |= (0x01<< dataPin);
+        }
+        else 
+        {
+            PORTB &= ~(0x01<< dataPin);
+        }
+        value >>= 1 ;        // Bit shift right the value being shifted out to SR
 
 
 
         // Then Toggle the SRclk pin
-        PORTB |= (0x0001 << SRclk); 
-        PORTB &= ~(0x0001 << SRclk); 
+        //_delay_ms(del);
+        PORTB |= (0x01 << SRclk);
+        //_delay_ms(del);
+        PORTB &= ~(0x01 << SRclk); 
 
 
 
     }
-    // Toggle the Rclk pin to putput the value shifted in. 
-    PORTB |= (0x0001 << Rclk); 
-    PORTB &= ~(0x0001 << Rclk);
+    // Toggle the Rclk pin to putput the value shifted in.
+    //_delay_ms(del); 
+    PORTB |= (0x01 << Rclk); 
+    //_delay_ms(del);
+    PORTB &= ~(0x01 << Rclk);
     
 
 }
@@ -53,18 +66,17 @@ void SR_out(int SRclk , int Rclk , int dataPin, int value , int LSB)
 
 int main()
 {
-    DDRB = 0b00100111;
+    DDRB = 0b00000111;
     int SRclk = 0; 
     int Rclk = 1; 
     int dataPin = 2; 
-    int dummy = 0;
 
 
     while(1)
     {
         for(int i = 0; i < 256; i++)
         {
-            for(int j =0; j < 1000000; j++){PORTB |= 32;}
+            _delay_ms(200);
 
             SR_out(SRclk , Rclk , dataPin , i , 0); 
 
