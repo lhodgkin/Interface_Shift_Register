@@ -21,43 +21,50 @@
     This function will work on PORTB Pins 
     The first time we will assume shifting out the LSB 
 
+    Revised: April 16, 2024 Luke Hodgkin
+    Added functionality option to output either
+    LSB First and MSB First to the shift register. 
+
 */
 
 void SR_out(int SRclk , int Rclk , int dataPin, int value , int LSB)
 {
-
-    
-    for (int i = 0; i < 8 ; i++) 
-    {
-        // Set output data pin
-        // This statment only turns on the the serial pin but dies not turn it off. 
-        if(!!(value & 0x01))
+ 
+    if(LSB == 1) 
+        for (int i = 0; i < 8 ; i++) 
         {
-            PORTB |= (0x01<< dataPin);
+                // Outputs using LSB first
+            
+                if(!!(value & 0x01)) PORTB |= (0x01<< dataPin); // Set output data pin
+                else PORTB &= ~(0x01<< dataPin);
+                value >>= 1 ;       // Bit shift right the value being shifted out to SR
+            
+                    // Then Toggle the SRclk pin
+            PORTB |= (0x01 << SRclk);
+            PORTB &= ~(0x01 << SRclk); 
+
         }
-        else 
+
+    else if(LSB == 0)       // Outputs using MSB first
+    {   
+        value <<= 8;
+
+        for (int i = 0; i < 8 ; i++)
         {
-            PORTB &= ~(0x01<< dataPin);
-        }
-        value >>= 1 ;        // Bit shift right the value being shifted out to SR
-
-
-
+            if(!!(value & 0x8000)) PORTB |= (0x01<< dataPin); // Set output data pin
+            else PORTB &= ~(0x01<< dataPin);
+            value <<= 1 ;
+        
         // Then Toggle the SRclk pin
-        //_delay_ms(del);
         PORTB |= (0x01 << SRclk);
-        //_delay_ms(del);
         PORTB &= ~(0x01 << SRclk); 
-
-
-
+        }
     }
-    // Toggle the Rclk pin to putput the value shifted in.
-    //_delay_ms(del); 
-    PORTB |= (0x01 << Rclk); 
-    //_delay_ms(del);
-    PORTB &= ~(0x01 << Rclk);
+
     
+    // Toggle the Rclk pin to putput the value shifted in.
+    PORTB |= (0x01 << Rclk); 
+    PORTB &= ~(0x01 << Rclk);
 
 }
 
@@ -66,19 +73,20 @@ void SR_out(int SRclk , int Rclk , int dataPin, int value , int LSB)
 
 int main()
 {
-    DDRB = 0b00000111;
+    DDRB = 0b00000111;      // Set the Output Pins
     int SRclk = 0; 
     int Rclk = 1; 
     int dataPin = 2; 
-
+    int LSB = 1; 
 
     while(1)
     {
+        LSB ^= 0x01;  // Toggle the mode of the SR between MSB and LSB after counting to 256. 
         for(int i = 0; i < 256; i++)
         {
             _delay_ms(200);
 
-            SR_out(SRclk , Rclk , dataPin , i , 0); 
+            SR_out(SRclk , Rclk , dataPin , i , LSB); 
 
         }
 

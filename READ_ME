@@ -1,8 +1,17 @@
 
 
-This repository is a test to start working with git and Makefile
-There is a cource file "source.c" which toggles the built in LED on
-an arduino UNO R3 "PORTB" pin 5. 
+This repository will implement a shift register for the TI SN74HC595N 8 - Bit Shift Register
+This file will work for PORTB of the AVR ATMEGA328P microcontroller. 
+This function can be implemented to shift out the MSB first or the LSB first by setting LSB 
+
+Ex/ void SR_out(int SRclk , int Rclk , int dataPin, int value , int LSB)
+Set LSB to 1 for LSB first and LSB to 0 for MSB first. 
+SRclk defines the clock signal to shift bits throught the shift register.
+Rclk defines the pin to load bits into the buffer. 
+the data pin is the serial data pin. 
+
+All of these pins must utilize the PORTB pins for this function to work without modification. 
+
 
 This repository uses "avr-gcc" as the compilier. 
 
